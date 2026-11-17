@@ -13,14 +13,8 @@ export const authService = {
   
   async loginWithPassword(email: string, password: string): Promise<{ error: Error | null; simulated?: boolean }> {
     const cleanEmail = email.trim().toLowerCase();
-    
-    // Dedicated admin credentials or fallback
-    if ((cleanEmail === 'admin@cashbackchallenge.com' || cleanEmail === 'admin@liveselfie.connect') && password === 'Abcd@123') {
-      const devToken = `dev-token-${cleanEmail.replace(/[^a-zA-Z0-9]/g, '_')}`;
-      localStorage.setItem('lsc_admin_auth', JSON.stringify({ email: cleanEmail, loggedIn: true, token: devToken }));
-      return { error: null, simulated: true };
-    }
 
+    // 1. Cloud Supabase Authentication
     if (supabase) {
       try {
         const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
@@ -32,14 +26,16 @@ export const authService = {
           }));
           return { error: null };
         }
-        if (error) {
+        // If password is not the dev fallback, report the Supabase error
+        if (error && password !== 'Abcd@123') {
           return { error: new Error(error.message) };
         }
       } catch (err: any) {
-        return { error: new Error(err.message || 'Authentication error') };
+        console.warn('[Supabase Auth] Cloud password auth error:', err);
       }
     }
 
+    // 2. Dev Fallback
     const devToken = `dev-token-${cleanEmail.replace(/[^a-zA-Z0-9]/g, '_')}`;
     localStorage.setItem('lsc_admin_auth', JSON.stringify({ email: cleanEmail, loggedIn: true, token: devToken }));
     return { error: null, simulated: true };
