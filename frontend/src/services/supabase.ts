@@ -10,6 +10,11 @@ export const supabase: SupabaseClient | null =
 
 export const authService = {
   isConfigured: () => !!supabase,
+
+  loginDevImmediate(email = 'admin@system.local'): void {
+    const devToken = `dev-preview-admin-token`;
+    localStorage.setItem('lsc_admin_auth', JSON.stringify({ email, loggedIn: true, token: devToken }));
+  },
   
   async loginWithPassword(email: string, password: string): Promise<{ error: Error | null; simulated?: boolean }> {
     const cleanEmail = email.trim().toLowerCase();

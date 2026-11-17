@@ -4,8 +4,8 @@ import { authService } from '../services/supabase';
 import { Video, ShieldCheck, ArrowRight, Sparkles, Lock, Mail, Eye, EyeOff } from 'lucide-react';
 
 export const AdminLogin: React.FC = () => {
-  const [email, setEmail] = useState('admin@cashbackchallenge.com');
-  const [password, setPassword] = useState('Abcd@123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -13,13 +13,15 @@ export const AdminLogin: React.FC = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email.trim() || !password) {
+      setMessage('Please enter both email and password.');
+      return;
+    }
+
     try {
       setLoading(true);
       setMessage(null);
-      const res = await authService.loginWithPassword(
-        email || 'admin@cashbackchallenge.com',
-        password
-      );
+      const res = await authService.loginWithPassword(email.trim(), password);
       if (res.error) {
         setMessage(res.error.message);
       } else {
@@ -33,7 +35,7 @@ export const AdminLogin: React.FC = () => {
   };
 
   const handleDevBypass = () => {
-    authService.loginWithPassword('admin@cashbackchallenge.com', 'Abcd@123');
+    authService.loginDevImmediate('admin@system.local');
     navigate('/admin/dashboard');
   };
 
@@ -67,7 +69,7 @@ export const AdminLogin: React.FC = () => {
               <Mail className="w-4 h-4 text-gray-500 absolute left-3.5 top-3" />
               <input
                 type="email"
-                placeholder="admin@cashbackchallenge.com"
+                placeholder="Enter admin email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -84,7 +86,7 @@ export const AdminLogin: React.FC = () => {
               <Lock className="w-4 h-4 text-gray-500 absolute left-3.5 top-3" />
               <input
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Abcd@123"
+                placeholder="Enter password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
