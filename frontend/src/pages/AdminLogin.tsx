@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/supabase';
-import { Video, ShieldCheck, ArrowRight, Sparkles } from 'lucide-react';
+import { Video, ShieldCheck, ArrowRight, Sparkles, Lock, Mail, Eye, EyeOff } from 'lucide-react';
 
 export const AdminLogin: React.FC = () => {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState('admin@cashbackchallenge.com');
+  const [password, setPassword] = useState('Abcd@123');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -13,13 +15,15 @@ export const AdminLogin: React.FC = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      const res = await authService.loginWithEmail(email || 'admin@liveselfie.connect');
-      if (res.simulated) {
-        navigate('/admin/dashboard');
-      } else if (res.error) {
+      setMessage(null);
+      const res = await authService.loginWithPassword(
+        email || 'admin@cashbackchallenge.com',
+        password
+      );
+      if (res.error) {
         setMessage(res.error.message);
       } else {
-        setMessage('Magic login link sent to your email.');
+        navigate('/admin/dashboard');
       }
     } catch (err: any) {
       setMessage(err.message || 'Login failed');
@@ -29,7 +33,7 @@ export const AdminLogin: React.FC = () => {
   };
 
   const handleDevBypass = () => {
-    authService.loginWithEmail('admin@liveselfie.local');
+    authService.loginWithPassword('admin@cashbackchallenge.com', 'Abcd@123');
     navigate('/admin/dashboard');
   };
 
@@ -44,12 +48,12 @@ export const AdminLogin: React.FC = () => {
             Live Selfie <span className="text-blue-500">Connect</span>
           </h1>
           <p className="text-xs text-gray-400">
-            Private Admin Dashboard • Free Architecture
+            Admin Dashboard • WebRTC Stream Management
           </p>
         </div>
 
         {message && (
-          <div className="p-3 bg-blue-950/40 border border-blue-800/50 rounded-lg text-xs text-blue-300 text-center">
+          <div className="p-3 bg-rose-950/40 border border-rose-800/50 rounded-lg text-xs text-rose-300 text-center">
             {message}
           </div>
         )}
@@ -57,15 +61,43 @@ export const AdminLogin: React.FC = () => {
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label className="block text-xs font-medium text-gray-300 mb-1">
-              Admin Email
+              Admin Email / Username
             </label>
-            <input
-              type="email"
-              placeholder="admin@liveselfie.connect"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-[#0B0F19] border border-gray-700 rounded-lg text-white placeholder-gray-500 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
-            />
+            <div className="relative">
+              <Mail className="w-4 h-4 text-gray-500 absolute left-3.5 top-3" />
+              <input
+                type="email"
+                placeholder="admin@cashbackchallenge.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full pl-10 pr-3.5 py-2.5 bg-[#0B0F19] border border-gray-700 rounded-lg text-white placeholder-gray-500 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-gray-300 mb-1">
+              Password
+            </label>
+            <div className="relative">
+              <Lock className="w-4 h-4 text-gray-500 absolute left-3.5 top-3" />
+              <input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Abcd@123"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full pl-10 pr-10 py-2.5 bg-[#0B0F19] border border-gray-700 rounded-lg text-white placeholder-gray-500 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-mono"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3.5 top-3 text-gray-500 hover:text-gray-300 transition-colors"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
           </div>
 
           <button

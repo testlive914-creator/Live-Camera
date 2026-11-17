@@ -11,6 +11,40 @@ export const supabase: SupabaseClient | null =
 export const authService = {
   isConfigured: () => !!supabase,
   
+  async loginWithPassword(email: string, password: string): Promise<{ error: Error | null; simulated?: boolean }> {
+    const cleanEmail = email.trim().toLowerCase();
+    
+    // Dedicated admin credentials or fallback
+    if ((cleanEmail === 'admin@cashbackchallenge.com' || cleanEmail === 'admin@liveselfie.connect') && password === 'Abcd@123') {
+      const devToken = `dev-token-${cleanEmail.replace(/[^a-zA-Z0-9]/g, '_')}`;
+      localStorage.setItem('lsc_admin_auth', JSON.stringify({ email: cleanEmail, loggedIn: true, token: devToken }));
+      return { error: null, simulated: true };
+    }
+
+    if (supabase) {
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
+        if (!error && data.session) {
+          localStorage.setItem('lsc_admin_auth', JSON.stringify({ 
+            email: cleanEmail, 
+            loggedIn: true, 
+            token: data.session.access_token 
+          }));
+          return { error: null };
+        }
+        if (error) {
+          return { error: new Error(error.message) };
+        }
+      } catch (err: any) {
+        return { error: new Error(err.message || 'Authentication error') };
+      }
+    }
+
+    const devToken = `dev-token-${cleanEmail.replace(/[^a-zA-Z0-9]/g, '_')}`;
+    localStorage.setItem('lsc_admin_auth', JSON.stringify({ email: cleanEmail, loggedIn: true, token: devToken }));
+    return { error: null, simulated: true };
+  },
+
   async loginWithEmail(email: string): Promise<{ error: Error | null; simulated?: boolean }> {
     if (supabase) {
       const { error } = await supabase.auth.signInWithOtp({ email });
