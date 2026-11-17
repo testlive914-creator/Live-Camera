@@ -24,7 +24,10 @@ router.post('/', validateBody(createSessionSchema), async (req: Request, res: Re
       maxParticipants
     });
 
-    const frontendBaseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const originHeader = req.get('origin') || req.headers.origin;
+    const frontendBaseUrl = (typeof originHeader === 'string' && originHeader) 
+      ? originHeader 
+      : (process.env.FRONTEND_URL || 'http://localhost:5173');
     const invitationUrl = `${frontendBaseUrl}/join/${rawToken}`;
 
     // Generate standard WhatsApp share message

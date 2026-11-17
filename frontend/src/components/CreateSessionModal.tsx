@@ -46,10 +46,20 @@ export const CreateSessionModal: React.FC<CreateSessionModalProps> = ({
         durationMinutes,
         maxParticipants
       });
+      const clientOrigin = window.location.origin;
+      const resolvedInvitationUrl = res.rawToken
+        ? `${clientOrigin}/join/${res.rawToken}`
+        : res.invitationUrl.replace(/^http:\/\/localhost:5173/, clientOrigin);
+
+      const waText = encodeURIComponent(
+        `Join my Live Selfie Connect session "${res.session.title}": ${resolvedInvitationUrl}\n(Note: Front-camera live stream only, no audio. Recording requires separate explicit consent).`
+      );
+      const resolvedWhatsappUrl = `https://wa.me/?text=${waText}`;
+
       setCreatedData({
         session: res.session,
-        invitationUrl: res.invitationUrl,
-        whatsappUrl: res.whatsappUrl
+        invitationUrl: resolvedInvitationUrl,
+        whatsappUrl: resolvedWhatsappUrl
       });
       if (onSessionCreated) {
         onSessionCreated(res.session);
