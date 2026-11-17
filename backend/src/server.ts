@@ -36,7 +36,7 @@ const corsOriginValidator = (origin: string | undefined, callback: (err: Error |
   if (!origin) {
     return callback(null, true);
   }
-  if (allowedOriginsSet.has(origin)) {
+  if (allowedOriginsSet.has('*') || allowedOriginsSet.has(origin) || origin.endsWith('.vercel.app') || origin.includes('vercel.app')) {
     return callback(null, true);
   }
   // Check if matches private LAN IP pattern if explicitly in development mode

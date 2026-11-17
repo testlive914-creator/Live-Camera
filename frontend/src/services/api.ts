@@ -52,16 +52,25 @@ export const api = {
     durationMinutes: number;
     maxParticipants: number;
   }): Promise<{ session: SessionData; rawToken: string; invitationUrl: string; whatsappUrl: string }> {
-    const res = await fetch(`${API_BASE_URL}/api/sessions`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(params)
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || 'Failed to create session');
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/sessions`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(params)
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Failed to create session');
+      }
+      return res.json();
+    } catch (err: any) {
+      if (err.name === 'TypeError' && err.message.includes('fetch')) {
+        throw new Error(
+          `Cannot connect to backend (${API_BASE_URL}). If deployed on Vercel, please set VITE_API_URL to your Render backend URL (e.g. https://cashbackadda.onrender.com) in Vercel Settings -> Environment Variables, and ensure Render is active.`
+        );
+      }
+      throw err;
     }
-    return res.json();
   },
 
   async listSessions(): Promise<SessionData[]> {
