@@ -1,6 +1,17 @@
 import { io, Socket } from 'socket.io-client';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const getSocketUrl = (): string => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (envUrl && !envUrl.includes('localhost')) {
+    return envUrl;
+  }
+  if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
+    return 'https://cashbackadda.onrender.com';
+  }
+  return envUrl || 'http://localhost:5000';
+};
+
+const API_BASE_URL = getSocketUrl();
 
 let socketInstance: Socket | null = null;
 

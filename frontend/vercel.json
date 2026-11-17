@@ -1,4 +1,7 @@
 {
+  "env": {
+    "VITE_API_URL": "https://cashbackadda.onrender.com"
+  },
   "rewrites": [
     {
       "source": "/(.*)",

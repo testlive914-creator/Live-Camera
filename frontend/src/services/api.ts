@@ -1,6 +1,17 @@
 import { authService } from './supabase';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const getBaseUrl = (): string => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (envUrl && !envUrl.includes('localhost')) {
+    return envUrl;
+  }
+  if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
+    return 'https://cashbackadda.onrender.com';
+  }
+  return envUrl || 'http://localhost:5000';
+};
+
+export const API_BASE_URL = getBaseUrl();
 
 export interface SessionData {
   id: string;
